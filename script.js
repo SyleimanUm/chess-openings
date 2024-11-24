@@ -81,3 +81,20 @@ document.getElementById('next-move').addEventListener('click', () => {
     document.getElementById('next-move').disabled = true;
   }
 });
+
+// Обработка возврата хода
+document.getElementById('undo-move').addEventListener('click', () => {
+  // Отменяем последний ход
+  chess.undo();
+  
+  // Обновляем доску
+  board.position(chess.fen());
+  
+  // Уменьшаем индекс текущего хода
+  if (currentMoveIndex > 0) {
+    currentMoveIndex--;
+  }
+  
+  // Включаем кнопку "Следующий ход", если были отменены ходы
+  document.getElementById('next-move').disabled = false;
+});

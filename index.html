@@ -26,18 +26,19 @@
       <option value="1. e4 c6 2. d4 d5">Защита Каро-Канн</option>
     </select>
     <button id="set-opening">Применить</button>
-    <button id="next-move" disabled>Следующий ход</button>
+    <button id="next-move">Следующий ход</button>
+    <button id="undo-move">Возврат хода</button> <!-- Кнопка возврата хода -->
   </div>
 
   <!-- Контейнер для шахматной доски -->
-  <div id="board" style="width: 400px"></div>
+    <div id="board" style="width: 400px"></div>
   
   <!-- Подключение библиотек -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> 
   <script src="libs/js/chessboard-1.0.0.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
-  <!-- Подключение внешнего файла -->
-  <script src="script.js"></script>
+  <script src="script.js"></script> <!-- Ваш внешний файл с JS кодом -->
+
 </body>
 </html>
