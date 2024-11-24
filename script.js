@@ -12,11 +12,28 @@ const board = Chessboard('board', {
       to: target,
       promotion: 'q' // Превращение пешки в ферзя
     });
-
+    
     if (move === null) return 'snapback'; // Если ход нелегален, вернуть фигуру
+    
+    // Функция проверки хода
+    function validateMove(move) {
+    if (currentMoveIndex >= movesArray.length) {
+      return false; // Нет ожидаемых ходов
+    }
+    return move === movesArray[currentMoveIndex]; // Сравниваем ход пользователя с ожидаемым
+    }
+    
+    // Проверяем, совпадает ли ход с дебютом
+    if (!validateMove(move.san)) {
+          chess.undo(); // Отменяем ход в логике
+          return 'snapback'; // Отменяем ход на доске
+        }
 
     // Обновить доску после успешного хода
     board.position(chess.fen());
+
+        // Увеличиваем индекс текущего хода
+        currentMoveIndex++;
   }
 });
 
@@ -59,6 +76,7 @@ document.getElementById('set-opening').addEventListener('click', () => {
 
   // Обновить доску
   board.position(chess.fen());
+
 
   // Включить кнопку "Следующий ход", если есть ходы
   document.getElementById('next-move').disabled = movesArray.length === 0;
