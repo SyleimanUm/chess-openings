@@ -10,12 +10,12 @@ const board = Chessboard('board', {
   draggable: true, // Фигуры можно перетаскивать
   position: 'start', // Начальная позиция
   onDrop: (source, target) => {
-
+    
     // Проверка, что это ход пользователя за белые
     if (chess.turn() !== 'w') {
       return 'snapback';
     }
-
+    
     // Проверка легальности хода
     const move = chess.move({
       from: source,
@@ -31,23 +31,63 @@ const board = Chessboard('board', {
       chess.undo(); // Отменяем ход в логике
       return 'snapback'; // Отменяем ход на доске
     }
-
+    
     
     // Обновить доску после успешного хода
     board.position(chess.fen());
     
     // Увеличиваем индекс текущего хода
     currentMoveIndex++;
-    
+
    // Ход компьютера
-    setTimeout(makeComputerMove, 500);
+   setTimeout(makeComputerMove, 500);
   }
 });
+
+    // Обработка возврата хода
+    document.getElementById('undo-move').addEventListener('click', () => {
+      // Отменяем последний ход
+      chess.undo();
+      
+      // Обновляем доску
+      board.position(chess.fen());
+      
+      // Уменьшаем индекс текущего хода
+      if (currentMoveIndex > 0) {
+        currentMoveIndex--;
+      }
+      
+      // Включаем кнопку "Следующий ход", если были отменены ходы
+      document.getElementById('next-move').disabled = false;
+    });
+    
+
+// Обработка следующего хода
+document.getElementById('next-move').addEventListener('click', () => {
+  // Проверяем, что текущий индекс меньше длины массива ходов
+  if (currentMoveIndex < movesArray.length) {
+    // Делаем ход из массива дебюта
+    const move = chess.move(movesArray[currentMoveIndex]);
+    
+  // Если ход возможен, обновляем доску
+    if (move) {
+      board.position(chess.fen()); // Обновить доску с новым состоянием
+      currentMoveIndex++; // Переход к следующему ходу
+    }
+  }
+  
+  // Если все ходы выполнены, отключаем кнопку
+  if (currentMoveIndex >= movesArray.length) {
+    document.getElementById('next-move').disabled = true;
+  }
+});
+
+// ==- Функции -== 
 
 // Функция хода компьютера
 function makeComputerMove() {
   if (currentMoveIndex < movesArray.length) {
-    const move = chess.move(movesArray[currentMoveIndex]); // Ход из дебюта
+    const move = chess.move(currentVariation[currentMoveIndex]); // Ход из дебюта
     if (move) {
       board.position(chess.fen()); // Обновляем доску
       currentMoveIndex++; // Переход к следующему ходу
@@ -55,23 +95,35 @@ function makeComputerMove() {
   }
 }
 
-// Функция проверки хода
-function validateMove(move) {
-if (currentMoveIndex >= movesArray.length) {
-  return false; // Нет ожидаемых ходов
+// Функция выбора случайной вариации
+function chooseRandomVariation(variations) {
+  const randomIndex = Math.floor(Math.random() * variations.length);
+  return parseMoves(variations[randomIndex]);
 }
-return move === movesArray[currentMoveIndex]; // Сравниваем ход пользователя с ожидаемым
+
+// Функция проверки соответствия хода
+function validateMove(move) {
+  if (currentMoveIndex >= currentVariation.length) return false;
+  return move === currentVariation[currentMoveIndex];
 }
 
 // Загружаем дебюты из файла JSON
 fetch('openings.json')
-  .then(response => response.json())
-  .then(data => {
-    const openings = data.openings;
-    
-    // Заполняем выпадающий список дебютами
-    const openingSelect = document.getElementById('opening-select');
-    openings.forEach(opening => {
+.then(response => response.json())
+.then(data => {
+  const selectedOpening = data.openings.find(o => o.name === openingName);
+
+
+    currentVariation = chooseRandomVariation(selectedOpening.variations);
+    currentMoveIndex = 0;
+
+ // Сбросить шахматную позицию
+  chess.reset();
+  board.position(chess.fen());
+  
+  // Заполняем выпадающий список дебютами
+  const openingSelect = document.getElementById('opening-select');
+  openings.forEach(opening => {
       const option = document.createElement('option');
       option.value = opening.moves;
       option.textContent = opening.name;
@@ -79,15 +131,15 @@ fetch('openings.json')
     });
   })
   .catch(error => console.error('Ошибка при загрузке дебютов:', error));
-
-// Логика выбора дебюта
+  
+// Функция обработки выбора дебюта
 document.getElementById('set-opening').addEventListener('click', () => {
   const openingSelect = document.getElementById('opening-select');
-  const moves = openingSelect.value;
-
+  const openingName = openingSelect.value;
+  
   // Сброс позиции на начальную
   chess.reset();
-
+  
   if (moves === 'start') {
     movesArray = [];
   } else {
@@ -95,16 +147,18 @@ document.getElementById('set-opening').addEventListener('click', () => {
     movesArray = parseMoves(moves);
     currentMoveIndex = 0;
   }
-
+  
   // Обновить доску
   board.position(chess.fen());
-
-
+  
+  
   // Включить кнопку "Следующий ход", если есть ходы
   document.getElementById('next-move').disabled = movesArray.length === 0;
 });
 
-// Парсим строку с ходами, удаляя числа
+
+
+// Парсер строк с ходами
 function parseMoves(movesString) {
   const moves = movesString.split(' ');
   let parsedMoves = [];
@@ -118,40 +172,3 @@ function parseMoves(movesString) {
 
   return parsedMoves;
 }
-
-// Обработка следующего хода
-document.getElementById('next-move').addEventListener('click', () => {
-  // Проверяем, что текущий индекс меньше длины массива ходов
-  if (currentMoveIndex < movesArray.length) {
-    // Делаем ход из массива дебюта
-    const move = chess.move(movesArray[currentMoveIndex]);
-
-    // Если ход возможен, обновляем доску
-    if (move) {
-      board.position(chess.fen()); // Обновить доску с новым состоянием
-      currentMoveIndex++; // Переход к следующему ходу
-    }
-  }
-
-  // Если все ходы выполнены, отключаем кнопку
-  if (currentMoveIndex >= movesArray.length) {
-    document.getElementById('next-move').disabled = true;
-  }
-});
-
-// Обработка возврата хода
-document.getElementById('undo-move').addEventListener('click', () => {
-  // Отменяем последний ход
-  chess.undo();
-  
-  // Обновляем доску
-  board.position(chess.fen());
-  
-  // Уменьшаем индекс текущего хода
-  if (currentMoveIndex > 0) {
-    currentMoveIndex--;
-  }
-  
-  // Включаем кнопку "Следующий ход", если были отменены ходы
-  document.getElementById('next-move').disabled = false;
-});
