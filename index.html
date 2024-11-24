@@ -12,15 +12,6 @@
       width: 400px; /* Размер шахматной доски */
       margin: 20px auto; /* Центрирование доски */
     }
-    #pgn-display {
-      width: 90%;
-      margin: 20px auto;
-      padding: 10px;
-      border: 1px solid #ccc;
-      background: #f9f9f9;
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body>
@@ -29,24 +20,23 @@
     <!-- Выпадающий список для выбора дебюта -->
     <label for="opening-select">Выберите дебют:</label>
     <select id="opening-select">
-      <!-- Опции будут динамически загружены из openings.json -->
+      <option value="start">Начальная позиция</option>
+      <option value="1. e4 e5 2. f4">Королевский гамбит</option>
+      <option value="1. e4 e5 2. Nf3 Nc6 3. Bc4">Итальянская партия</option>
+      <option value="1. e4 c6 2. d4 d5">Защита Каро-Канн</option>
     </select>
     <button id="set-opening">Применить</button>
-    <button id="next-move">Следующий ход</button>
-    <button id="undo-move">Возврат хода</button> <!-- Кнопка возврата хода -->
   </div>
 
   <!-- Контейнер для шахматной доски -->
-  <div id="board"></div>
-  <!-- Область для отображения ходов -->
-  <div id="pgn-display"></div>
+  <div id="board" style="width: 400px"></div>
   
   <!-- Подключение библиотек -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> 
   <script src="libs/js/chessboard-1.0.0.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
-  <script src="script.js"></script> <!-- Ваш внешний файл с JS кодом -->
-
+  <!-- Подключение внешнего файла -->
+  <script src="script.js"></script>
 </body>
 </html>
