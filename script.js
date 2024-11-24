@@ -20,19 +20,64 @@ const board = Chessboard('board', {
   }
 });
 
+// Переменные для хранения ходов дебюта
+let movesArray = [];
+let currentMoveIndex = 0;
+
 // Логика выбора дебюта
 document.getElementById('set-opening').addEventListener('click', () => {
   const openingSelect = document.getElementById('opening-select');
   const moves = openingSelect.value;
 
+  // Сброс позиции на начальную
+  chess.reset();
+
   if (moves === 'start') {
-    chess.reset(); // Сбросить позицию
+    movesArray = [];
   } else {
-    chess.reset(); // Сбросить позицию перед установкой
-    const movesArray = moves.split(' '); // Разделить ходы
-    movesArray.forEach(move => chess.move(move)); // Применить ходы
+    // Преобразуем строку в массив ходов, игнорируя нумерацию ходов
+    movesArray = parseMoves(moves);
+    currentMoveIndex = 0;
   }
 
-  // Установить позицию на доске
+  // Обновить доску
   board.position(chess.fen());
+
+  // Включить кнопку "Следующий ход", если есть ходы
+  document.getElementById('next-move').disabled = movesArray.length === 0;
+});
+
+// Парсим строку с ходами, удаляя числа
+function parseMoves(movesString) {
+  const moves = movesString.split(' ');
+  let parsedMoves = [];
+
+  // Проходим по массиву и извлекаем только шахматные ходы (игнорируя цифры и точки)
+  moves.forEach(move => {
+    if (!/^\d+\./.test(move)) { // Пропускаем номера ходов (например, "1.", "2.", и т.д.)
+      parsedMoves.push(move);
+    }
+  });
+
+  return parsedMoves;
+}
+
+// Обработка следующего хода
+document.getElementById('next-move').addEventListener('click', () => {
+  // Проверяем, что текущий индекс меньше длины массива ходов
+  if (currentMoveIndex < movesArray.length) {
+    // Делаем ход из массива дебюта
+    const move = chess.move(movesArray[currentMoveIndex]);
+
+    // Если ход возможен, обновляем доску
+    if (move) {
+      board.position(chess.fen()); // Обновить доску с новым состоянием
+      currentMoveIndex++; // Переход к следующему ходу
+    }
+  }
+
+  // Если все ходы выполнены, отключаем кнопку
+  if (currentMoveIndex >= movesArray.length) {
+    document.getElementById('next-move').disabled = true;
+  }
 });
