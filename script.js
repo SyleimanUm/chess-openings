@@ -24,6 +24,23 @@ const board = Chessboard('board', {
 let movesArray = [];
 let currentMoveIndex = 0;
 
+// Загружаем дебюты из файла JSON
+fetch('openings.json')
+  .then(response => response.json())
+  .then(data => {
+    const openings = data.openings;
+    
+    // Заполняем выпадающий список дебютами
+    const openingSelect = document.getElementById('opening-select');
+    openings.forEach(opening => {
+      const option = document.createElement('option');
+      option.value = opening.moves;
+      option.textContent = opening.name;
+      openingSelect.appendChild(option);
+    });
+  })
+  .catch(error => console.error('Ошибка при загрузке дебютов:', error));
+
 // Логика выбора дебюта
 document.getElementById('set-opening').addEventListener('click', () => {
   const openingSelect = document.getElementById('opening-select');
